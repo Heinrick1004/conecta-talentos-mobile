@@ -3,8 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:conecta_talentos_app/main.dart';
 import 'package:conecta_talentos_app/mock/mock_favoritos.dart';
+import 'package:conecta_talentos_app/mock/mock_candidaturas.dart';
 import 'package:conecta_talentos_app/mock/mock_vagas.dart';
 import 'package:conecta_talentos_app/screens/cadastro_screen.dart';
+import 'package:conecta_talentos_app/screens/candidaturas_screen.dart';
+import 'package:conecta_talentos_app/screens/detalhes_candidatura_screen.dart';
+import 'package:conecta_talentos_app/screens/detalhes_vaga_screen.dart';
 import 'package:conecta_talentos_app/screens/login_screen.dart';
 import 'package:conecta_talentos_app/screens/meus_interesses_screen.dart';
 import 'package:conecta_talentos_app/theme/app_colors.dart';
@@ -31,6 +35,18 @@ void main() {
       expect(mockFavoritos.vagas, hasLength(1));
       mockFavoritos.remover(vaga);
       expect(mockFavoritos.vagas, isEmpty);
+    },
+  );
+
+  test(
+    'candidaturas usam as vagas mock correspondentes sem procurar pelo título',
+    () {
+      expect(mockCandidaturas[0].vaga, same(mockVagas[0]));
+      expect(mockCandidaturas[1].vaga, same(mockVagas[1]));
+      expect(mockCandidaturas[2].vaga, same(mockVagas[2]));
+      expect(mockCandidaturas[3].vaga.titulo, 'Técnico de Suporte');
+      expect(mockCandidaturas[3].vaga.descricao, isEmpty);
+      expect(mockCandidaturas[3].vaga.requisitos, isEmpty);
     },
   );
 
@@ -223,5 +239,106 @@ void main() {
     expect(find.byType(MeusInteressesScreen), findsOneWidget);
     expect(find.text('Nenhuma vaga salva ainda'), findsOneWidget);
     expect(find.text('Desenvolvedor .NET'), findsNothing);
+  });
+
+  testWidgets(
+    'card de candidatura abre detalhes e Ver vaga impede candidatura duplicada',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MaterialApp(theme: AppTheme.light, home: const CandidaturasScreen()),
+      );
+      await tester.pumpAndSettle();
+
+      final candidatura = find.text('Analista de Sistemas');
+      await tester.ensureVisible(candidatura);
+      await tester.pumpAndSettle();
+      await tester.tap(candidatura);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DetalhesCandidaturaScreen), findsOneWidget);
+      expect(find.text('Detalhes da candidatura'), findsOneWidget);
+      expect(find.text('Selecionado'), findsOneWidget);
+      expect(find.text('Etapas do processo'), findsOneWidget);
+      expect(find.text('Proposta'), findsOneWidget);
+
+      await tester.tap(find.text('Ver vaga'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DetalhesVagaScreen), findsOneWidget);
+      expect(find.text('Analista de Sistemas'), findsOneWidget);
+      expect(find.text('Você já se candidatou'), findsOneWidget);
+      expect(find.byTooltip('Adicionar aos interesses'), findsOneWidget);
+      expect(find.text('Candidatar-se'), findsNothing);
+
+      await tester.tap(find.byTooltip('Voltar'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DetalhesCandidaturaScreen), findsOneWidget);
+      await tester.tap(find.byTooltip('Voltar'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CandidaturasScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets('detalhes exibem status em análise e rejeitado', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(theme: AppTheme.light, home: const CandidaturasScreen()),
+    );
+    await tester.pumpAndSettle();
+
+    final emAnalise = find.text('Desenvolvedor .NET');
+    await tester.ensureVisible(emAnalise);
+    await tester.pumpAndSettle();
+    await tester.tap(emAnalise);
+    await tester.pumpAndSettle();
+    expect(find.text('Em análise'), findsOneWidget);
+    expect(find.text('Entrevista'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Voltar'));
+    await tester.pumpAndSettle();
+    final filtroRejeitado = find.text('Rejeitado');
+    await tester.ensureVisible(filtroRejeitado);
+    await tester.pumpAndSettle();
+    await tester.tap(filtroRejeitado);
+    await tester.pumpAndSettle();
+
+    final rejeitada = find.text('Técnico de Suporte');
+    await tester.ensureVisible(rejeitada);
+    await tester.pumpAndSettle();
+    await tester.tap(rejeitada);
+    await tester.pumpAndSettle();
+    expect(find.text('Rejeitado'), findsOneWidget);
+    expect(find.text('Sobre a vaga'), findsNothing);
+    expect(find.text('Ver vaga'), findsOneWidget);
+  });
+
+  testWidgets('vaga da Home continua permitindo uma nova candidatura', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: DetalhesVagaScreen(vaga: mockVagas.first),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final candidatar = find.text('Candidatar-se');
+    expect(candidatar, findsOneWidget);
+    await tester.tap(candidatar);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Confirmar candidatura'), findsOneWidget);
   });
 }

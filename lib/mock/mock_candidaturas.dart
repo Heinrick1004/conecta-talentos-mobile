@@ -1,66 +1,69 @@
 import 'package:flutter/material.dart';
 
+import 'mock_vagas.dart';
+
 enum CandidaturaStatus { emAnalise, selecionado, rejeitado }
 
 /// Modelo e exemplos locais usados pela tela de candidaturas.
 class CandidaturaMock {
   const CandidaturaMock({
-    required this.titulo,
-    required this.empresa,
-    required this.local,
-    required this.modalidade,
+    required this.vaga,
     required this.status,
     required this.etapas,
     required this.etapaAtual,
     required this.icone,
   });
 
-  final String titulo;
-  final String empresa;
-  final String local;
-  final String modalidade;
+  final VagaMock vaga;
   final CandidaturaStatus status;
   final List<String> etapas;
   final int etapaAtual;
   final IconData icone;
+
+  String get titulo => vaga.titulo;
+  String get empresa => vaga.empresa;
+  String get local => vaga.local;
+  String get modalidade => vaga.modalidade;
+
+  String get textoStatus => switch (status) {
+    CandidaturaStatus.emAnalise => 'Em análise',
+    CandidaturaStatus.selecionado => 'Selecionado',
+    CandidaturaStatus.rejeitado => 'Rejeitado',
+  };
 }
 
 const mockCandidaturas = <CandidaturaMock>[
   CandidaturaMock(
-    titulo: 'Desenvolvedor .NET',
-    empresa: 'XP Tecnologia',
-    local: 'Sorocaba, SP',
-    modalidade: 'Híbrido',
+    vaga: mockVagaDesenvolvedor,
     status: CandidaturaStatus.emAnalise,
     etapas: ['Candidatura', 'Entrevista', 'Resultado'],
     etapaAtual: 0,
     icone: Icons.code_rounded,
   ),
   CandidaturaMock(
-    titulo: 'Analista de Sistemas',
-    empresa: 'TechSolutions',
-    local: 'São Paulo, SP',
-    modalidade: 'Remoto',
+    vaga: mockVagaAnalista,
     status: CandidaturaStatus.selecionado,
     etapas: ['Candidatura', 'Entrevista', 'Proposta'],
     etapaAtual: 2,
     icone: Icons.bar_chart_rounded,
   ),
   CandidaturaMock(
-    titulo: 'Estágio em TI',
-    empresa: 'Next Tecnologia',
-    local: 'Campinas, SP',
-    modalidade: 'Presencial',
+    vaga: mockVagaEstagio,
     status: CandidaturaStatus.emAnalise,
     etapas: ['Candidatura', 'Entrevista', 'Resultado'],
     etapaAtual: 0,
     icone: Icons.laptop_mac_rounded,
   ),
   CandidaturaMock(
-    titulo: 'Técnico de Suporte',
-    empresa: 'HelpTech',
-    local: 'Sorocaba, SP',
-    modalidade: 'Presencial',
+    vaga: VagaMock(
+      titulo: 'Técnico de Suporte',
+      empresa: 'HelpTech',
+      local: 'Sorocaba, SP',
+      modalidade: 'Presencial',
+      sigla: 'HT',
+      iconeModalidade: Icons.business_outlined,
+      indiceDestaque: 3,
+    ),
     status: CandidaturaStatus.rejeitado,
     etapas: ['Candidatura', 'Entrevista', 'Resultado'],
     etapaAtual: 0,

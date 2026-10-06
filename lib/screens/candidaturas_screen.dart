@@ -6,9 +6,11 @@ import '../theme/app_text_styles.dart';
 import '../widgets/app_bottom_nav_bar.dart';
 import '../widgets/app_card.dart';
 import '../widgets/app_header.dart';
+import '../widgets/candidatura_progress.dart';
 import '../widgets/icon_avatar_box.dart';
 import '../widgets/staggered_list_item.dart';
 import '../widgets/status_badge.dart';
+import 'detalhes_candidatura_screen.dart';
 
 /// Tela de acompanhamento das candidaturas do usuário.
 class CandidaturasScreen extends StatefulWidget {
@@ -81,6 +83,8 @@ class _CandidaturasScreenState extends State<CandidaturasScreen> {
                                   candidaturas[index],
                                 ) %
                                 AppColors.cardAccentColors.length],
+                        onNavigationItemSelected:
+                            widget.onNavigationItemSelected,
                       ),
                     ),
                   if (candidaturas.isEmpty)
@@ -175,10 +179,12 @@ class _CardCandidatura extends StatefulWidget {
   const _CardCandidatura({
     required this.candidatura,
     required this.corDestaque,
+    required this.onNavigationItemSelected,
   });
 
   final CandidaturaMock candidatura;
   final Color corDestaque;
+  final ValueChanged<int>? onNavigationItemSelected;
 
   @override
   State<_CardCandidatura> createState() => _CardCandidaturaState();
@@ -203,9 +209,14 @@ class _CardCandidaturaState extends State<_CardCandidatura> {
         onTapDown: (_) => _definirPressionado(true),
         onTapUp: (_) => _definirPressionado(false),
         onTapCancel: () => _definirPressionado(false),
-        onTap: () {
-          // TODO: navegar para os detalhes desta candidatura.
-        },
+        onTap: () => Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => DetalhesCandidaturaScreen(
+              candidatura: candidatura,
+              onNavigationItemSelected: widget.onNavigationItemSelected,
+            ),
+          ),
+        ),
         child: AnimatedScale(
           scale: _pressionado ? 0.985 : 1,
           duration: const Duration(milliseconds: 120),
@@ -276,7 +287,7 @@ class _CardCandidaturaState extends State<_CardCandidatura> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _ProgressoCandidatura(candidatura: candidatura),
+                CandidaturaProgress(candidatura: candidatura),
               ],
             ),
           ),
@@ -319,105 +330,6 @@ class _InfoCandidatura extends StatelessWidget {
         const SizedBox(width: 4),
         Text(texto, style: AppTextStyles.caption),
       ],
-    );
-  }
-}
-
-class _ProgressoCandidatura extends StatelessWidget {
-  const _ProgressoCandidatura({required this.candidatura});
-
-  final CandidaturaMock candidatura;
-
-  Color get _corProgresso => switch (candidatura.status) {
-    CandidaturaStatus.emAnalise => AppColors.primary,
-    CandidaturaStatus.selecionado => AppColors.success,
-    CandidaturaStatus.rejeitado => AppColors.neutral400,
-  };
-
-  bool get _rejeitado => candidatura.status == CandidaturaStatus.rejeitado;
-  bool get _selecionado => candidatura.status == CandidaturaStatus.selecionado;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            for (var index = 0; index < candidatura.etapas.length; index++) ...[
-              if (index > 0)
-                Expanded(
-                  child: Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      Container(height: 2, color: AppColors.neutral200),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 500),
-                        curve: Curves.easeInOut,
-                        height: 2,
-                        width: _selecionado || index <= candidatura.etapaAtual
-                            ? double.infinity
-                            : 0,
-                        color: _corProgresso,
-                      ),
-                    ],
-                  ),
-                ),
-              _PontoProgresso(
-                ativo: _selecionado || index <= candidatura.etapaAtual,
-                cor: _rejeitado ? AppColors.neutral400 : _corProgresso,
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 7),
-        Row(
-          children: [
-            for (var index = 0; index < candidatura.etapas.length; index++)
-              Expanded(
-                child: Text(
-                  candidatura.etapas[index],
-                  textAlign: index == 0
-                      ? TextAlign.left
-                      : index == candidatura.etapas.length - 1
-                      ? TextAlign.right
-                      : TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.caption.copyWith(
-                    color:
-                        !_rejeitado &&
-                            (_selecionado || index <= candidatura.etapaAtual)
-                        ? _corProgresso
-                        : AppColors.neutral600,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _PontoProgresso extends StatelessWidget {
-  const _PontoProgresso({required this.ativo, required this.cor});
-
-  final bool ativo;
-  final Color cor;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOut,
-      width: 12,
-      height: 12,
-      decoration: BoxDecoration(
-        color: ativo ? cor : AppColors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: ativo ? cor : AppColors.neutral200, width: 2),
-      ),
     );
   }
 }

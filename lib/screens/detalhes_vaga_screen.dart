@@ -14,11 +14,13 @@ import 'candidatura_confirmacao_screen.dart';
 class DetalhesVagaScreen extends StatefulWidget {
   const DetalhesVagaScreen({
     required this.vaga,
+    this.jaCandidatado = false,
     this.onNavigationItemSelected,
     super.key,
   });
 
   final VagaMock vaga;
+  final bool jaCandidatado;
   final ValueChanged<int>? onNavigationItemSelected;
 
   @override
@@ -141,47 +143,51 @@ class _DetalhesVagaScreenState extends State<DetalhesVagaScreen> {
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 24),
-                              Text(
-                                'Descrição',
-                                style: AppTextStyles.sectionTitle,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                widget.vaga.descricao,
-                                style: AppTextStyles.bodyText,
-                              ),
-                              const SizedBox(height: 24),
-                              Text(
-                                'Requisitos',
-                                style: AppTextStyles.sectionTitle,
-                              ),
-                              const SizedBox(height: 10),
-                              for (final requisito in widget.vaga.requisitos)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 2),
-                                        child: Icon(
-                                          Icons.check_circle_outline_rounded,
-                                          size: 19,
-                                          color: corDestaque,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          requisito,
-                                          style: AppTextStyles.bodyText,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                              if (widget.vaga.descricao.isNotEmpty) ...[
+                                const SizedBox(height: 24),
+                                Text(
+                                  'Descrição',
+                                  style: AppTextStyles.sectionTitle,
                                 ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  widget.vaga.descricao,
+                                  style: AppTextStyles.bodyText,
+                                ),
+                              ],
+                              if (widget.vaga.requisitos.isNotEmpty) ...[
+                                const SizedBox(height: 24),
+                                Text(
+                                  'Requisitos',
+                                  style: AppTextStyles.sectionTitle,
+                                ),
+                                const SizedBox(height: 10),
+                                for (final requisito in widget.vaga.requisitos)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 2),
+                                          child: Icon(
+                                            Icons.check_circle_outline_rounded,
+                                            size: 19,
+                                            color: corDestaque,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            requisito,
+                                            style: AppTextStyles.bodyText,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
                               const SizedBox(height: 16),
                             ],
                           )
@@ -216,9 +222,13 @@ class _DetalhesVagaScreenState extends State<DetalhesVagaScreen> {
               ],
             ),
             child: PrimaryButton(
-              label: 'Candidatar-se',
-              showArrow: true,
-              onPressed: () {
+              label: widget.jaCandidatado
+                  ? 'Você já se candidatou'
+                  : 'Candidatar-se',
+              showArrow: !widget.jaCandidatado,
+              onPressed: widget.jaCandidatado
+                  ? null
+                  : () {
                 Navigator.of(context).push<void>(
                   MaterialPageRoute<void>(
                     builder: (_) => CandidaturaConfirmacaoScreen(
