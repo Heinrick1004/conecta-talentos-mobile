@@ -1,4 +1,4 @@
-# conecta_talentos_app
+# conecta-talentos-mobile
 
 A new Flutter project.
 
