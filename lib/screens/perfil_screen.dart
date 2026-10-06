@@ -10,6 +10,7 @@ import '../widgets/app_card.dart';
 import '../widgets/app_header.dart';
 import '../widgets/staggered_list_item.dart';
 import 'editar_perfil_screen.dart';
+import 'login_screen.dart';
 
 /// Tela de perfil do candidato.
 class PerfilScreen extends StatelessWidget {
@@ -118,6 +119,32 @@ class PerfilScreen extends StatelessWidget {
                       ),
                     const SizedBox(height: 4),
                     const _BannerFuturo(),
+                    const SizedBox(height: 12),
+                    AppCard(
+                      padding: EdgeInsets.zero,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: TextButton.icon(
+                          onPressed: () => _confirmarSaida(context),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft,
+                            foregroundColor: AppColors.danger,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                          ),
+                          icon: const Icon(Icons.logout_rounded),
+                          label: Text(
+                            'Sair da conta',
+                            style: AppTextStyles.bodyText.copyWith(
+                              color: AppColors.danger,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -129,6 +156,35 @@ class PerfilScreen extends StatelessWidget {
         currentIndex: 3,
         onItemSelected: onNavigationItemSelected ?? (_) {},
       ),
+    );
+  }
+
+  Future<void> _confirmarSaida(BuildContext context) async {
+    final confirmarSaida = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Sair da conta?'),
+        content: const Text('Tem certeza que deseja sair?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmarSaida != true || !context.mounted) return;
+
+    // TODO: ao integrar a API, remover token/sessão persistida durante o logout.
+    Navigator.of(context).pushAndRemoveUntil<void>(
+      MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+      (route) => false,
     );
   }
 }

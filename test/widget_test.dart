@@ -76,4 +76,51 @@ void main() {
     expect(find.byType(LoginScreen), findsOneWidget);
     expect(find.text('Entrar'), findsOneWidget);
   });
+
+  testWidgets('logout pode ser cancelado e limpa a pilha ao sair', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.enterText(find.byType(TextField).at(0), 'teste@teste.com');
+    await tester.enterText(find.byType(TextField).at(1), '123456');
+    await tester.tap(find.text('Entrar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    await tester.tap(find.text('Perfil'));
+    await tester.pump();
+    final botaoSair = find.text('Sair da conta');
+    await tester.ensureVisible(botaoSair);
+    await tester.pump();
+    await tester.tap(botaoSair);
+    await tester.pump();
+
+    expect(find.text('Sair da conta?'), findsOneWidget);
+    await tester.tap(find.text('Cancelar'));
+    await tester.pump();
+    expect(find.text('Sair da conta'), findsOneWidget);
+    expect(find.byType(LoginScreen), findsNothing);
+
+    await tester.ensureVisible(botaoSair);
+    await tester.pump();
+    await tester.tap(botaoSair);
+    await tester.pump();
+    await tester.tap(find.text('Sair'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.text('Vagas para você'), findsNothing);
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(find.byType(LoginScreen), findsOneWidget);
+    expect(find.text('Vagas para você'), findsNothing);
+  });
 }
