@@ -324,6 +324,10 @@ class _CadastroScreenState extends State<CadastroScreen> {
     }
 
     setState(() => _erroValidacao = null);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Conta criada com sucesso!')),
+    );
+    Navigator.of(context).pop();
     // TODO: integrar com AuthController / API de registro de candidato.
   }
 }

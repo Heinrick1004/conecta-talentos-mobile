@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'cadastro_screen.dart';
+import 'main_navigation_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../widgets/icon_avatar_box.dart';
@@ -256,9 +257,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     PrimaryButton(
                       label: 'Entrar',
                       showArrow: true,
-                      onPressed: () {
-                        // TODO: integrar com AuthController / API de login.
-                      },
+                      onPressed: _loginMockado,
                     ),
                     const SizedBox(height: 22),
                     Row(
@@ -350,6 +349,25 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: AppColors.primary),
       ),
+    );
+  }
+
+  void _loginMockado() {
+    final email = _emailController.text.trim();
+    final senha = _senhaController.text.trim();
+
+    if (email.isEmpty || senha.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Informe seu e-mail e senha para continuar.'),
+        ),
+      );
+      return;
+    }
+
+    // TODO: substituir autenticação mock pela API REST posteriormente.
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(builder: (_) => const MainNavigationScreen()),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/main_navigation_screen.dart';
+import 'screens/login_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() {
@@ -15,7 +15,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ConectaTalentos',
       theme: AppTheme.light,
-      home: const MainNavigationScreen(),
+      debugShowCheckedModeBanner: false,
+      home: const LoginScreen(),
     );
   }
 }

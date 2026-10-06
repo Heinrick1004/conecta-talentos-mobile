@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
 import 'candidaturas_screen.dart';
@@ -14,49 +13,24 @@ class MainNavigationScreen extends StatefulWidget {
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _animation;
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 320),
-    );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   void _selecionarAba(int index) {
     if (index == _selectedIndex) return;
     setState(() => _selectedIndex = index);
-    _controller.forward(from: 0);
   }
 
   @override
   Widget build(BuildContext context) {
-    return SharedAxisTransition(
-      animation: _animation,
-      secondaryAnimation: ReverseAnimation(_animation),
-      transitionType: SharedAxisTransitionType.horizontal,
-      child: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          HomeScreen(onNavigationItemSelected: _selecionarAba),
-          CandidaturasScreen(onNavigationItemSelected: _selecionarAba),
-          CapacitacaoScreen(onNavigationItemSelected: _selecionarAba),
-          PerfilScreen(onNavigationItemSelected: _selecionarAba),
-        ],
-      ),
+    return IndexedStack(
+      index: _selectedIndex,
+      children: [
+        HomeScreen(onNavigationItemSelected: _selecionarAba),
+        CandidaturasScreen(onNavigationItemSelected: _selecionarAba),
+        CapacitacaoScreen(onNavigationItemSelected: _selecionarAba),
+        PerfilScreen(onNavigationItemSelected: _selecionarAba),
+      ],
     );
   }
 }
