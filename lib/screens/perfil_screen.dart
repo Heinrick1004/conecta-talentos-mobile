@@ -11,6 +11,7 @@ import '../widgets/app_header.dart';
 import '../widgets/staggered_list_item.dart';
 import 'editar_perfil_screen.dart';
 import 'login_screen.dart';
+import 'meus_interesses_screen.dart';
 
 /// Tela de perfil do candidato.
 class PerfilScreen extends StatelessWidget {
@@ -305,6 +306,12 @@ class _ItemMenuPerfilState extends State<_ItemMenuPerfil> {
             Navigator.of(context).push<void>(
               MaterialPageRoute<void>(
                 builder: (_) => const EditarPerfilScreen(),
+              ),
+            );
+          } else if (widget.item.titulo == 'Meus interesses') {
+            Navigator.of(context).push<void>(
+              MaterialPageRoute<void>(
+                builder: (_) => const MeusInteressesScreen(),
               ),
             );
           } else {

@@ -2,12 +2,38 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:conecta_talentos_app/main.dart';
+import 'package:conecta_talentos_app/mock/mock_favoritos.dart';
+import 'package:conecta_talentos_app/mock/mock_vagas.dart';
 import 'package:conecta_talentos_app/screens/cadastro_screen.dart';
 import 'package:conecta_talentos_app/screens/login_screen.dart';
+import 'package:conecta_talentos_app/screens/meus_interesses_screen.dart';
 import 'package:conecta_talentos_app/theme/app_colors.dart';
 import 'package:conecta_talentos_app/theme/app_theme.dart';
 
 void main() {
+  test(
+    'favoritos impedem duplicação e permitem remover e adicionar novamente',
+    () {
+      final vaga = mockVagas.first;
+
+      if (mockFavoritos.contem(vaga)) {
+        mockFavoritos.alternar(vaga);
+      }
+
+      mockFavoritos.adicionar(vaga);
+      mockFavoritos.adicionar(vaga);
+      expect(mockFavoritos.vagas, hasLength(1));
+      expect(mockFavoritos.contem(vaga), isTrue);
+
+      mockFavoritos.remover(vaga);
+      expect(mockFavoritos.vagas, isEmpty);
+      mockFavoritos.adicionar(vaga);
+      expect(mockFavoritos.vagas, hasLength(1));
+      mockFavoritos.remover(vaga);
+      expect(mockFavoritos.vagas, isEmpty);
+    },
+  );
+
   testWidgets('aplicativo inicia em LoginScreen', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pump(const Duration(milliseconds: 350));
@@ -29,7 +55,10 @@ void main() {
     await tester.tap(find.text('Entrar'));
     await tester.pump();
 
-    expect(find.text('Informe seu e-mail e senha para continuar.'), findsOneWidget);
+    expect(
+      find.text('Informe seu e-mail e senha para continuar.'),
+      findsOneWidget,
+    );
     expect(find.byType(LoginScreen), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 1500));
     await tester.pumpAndSettle();
@@ -122,5 +151,77 @@ void main() {
     await tester.pump();
     expect(find.byType(LoginScreen), findsOneWidget);
     expect(find.text('Vagas para você'), findsNothing);
+  });
+
+  testWidgets('favoritos abrem em Meus interesses e atualizam ao remover', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final vaga = mockVagas.first;
+    if (mockFavoritos.contem(vaga)) {
+      mockFavoritos.alternar(vaga);
+    }
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.enterText(find.byType(TextField).at(0), 'teste@teste.com');
+    await tester.enterText(find.byType(TextField).at(1), '123456');
+    await tester.tap(find.text('Entrar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    final abrirDetalhes = find.byTooltip('Ver vaga: Desenvolvedor .NET');
+    await tester.ensureVisible(abrirDetalhes);
+    await tester.pump();
+    await tester.tap(abrirDetalhes);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+
+    await tester.tap(find.byTooltip('Adicionar aos interesses'));
+    await tester.pump();
+    expect(mockFavoritos.vagas, hasLength(1));
+    expect(find.text('Vaga adicionada aos interesses'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Remover dos interesses'));
+    await tester.pump();
+    expect(mockFavoritos.vagas, isEmpty);
+    await tester.tap(find.byTooltip('Adicionar aos interesses'));
+    await tester.pump();
+    expect(mockFavoritos.vagas, hasLength(1));
+
+    await tester.tap(find.byTooltip('Voltar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.tap(find.text('Perfil'));
+    await tester.pump();
+
+    final meusInteresses = find.text('Meus interesses');
+    await tester.ensureVisible(meusInteresses);
+    await tester.pump();
+    await tester.tap(meusInteresses);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.byType(MeusInteressesScreen), findsOneWidget);
+    expect(find.text('Vagas que você salvou'), findsOneWidget);
+    expect(find.text('Desenvolvedor .NET'), findsOneWidget);
+
+    await tester.tap(find.text('Desenvolvedor .NET').last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+    await tester.tap(find.byTooltip('Remover dos interesses'));
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Voltar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.byType(MeusInteressesScreen), findsOneWidget);
+    expect(find.text('Nenhuma vaga salva ainda'), findsOneWidget);
+    expect(find.text('Desenvolvedor .NET'), findsNothing);
   });
 }
